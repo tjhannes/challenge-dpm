@@ -11,3 +11,5 @@ To run the frontend:
 - `cd frontend`
 - `npm install`
 - `npm run dev`
+
+![screenshot](README-screenshot.png)
