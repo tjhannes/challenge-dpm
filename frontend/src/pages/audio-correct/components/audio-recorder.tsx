@@ -1,10 +1,10 @@
-// source: https://gist.github.com/QasidLabeed/e0a6c272945cec4dfd3213187d8c588a
 import { Card } from "@/components/ui/card"
 import { PlayCircle, StopCircle } from "lucide-react"
 import { useRef, useState } from "react"
 import { toast } from "react-toastify"
 import { submitAudio } from "../utils/api"
 import { forwardRef } from "react"
+import { useAudioRecorder } from "../utils/use-audio-recorder"
 
 type AudioRecorderProps = {
   currentStep: number
@@ -13,36 +13,19 @@ type AudioRecorderProps = {
 export const AudioRecorder = forwardRef<HTMLInputElement, AudioRecorderProps>(
   ({ currentStep }, ref) => {
     const [email, setEmail] = useState("")
-    const [isRecording, setIsRecording] = useState(false)
-    const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
     const [isUploaded, setIsUploaded] = useState(false)
     const mediaRecorderRef = useRef<MediaRecorder | null>(null)
     const audioChunksRef = useRef<Blob[]>([])
 
-    const handleStartRecording = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      mediaRecorderRef.current = new MediaRecorder(stream)
-
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data)
-      }
-
-      mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/wav",
-        })
-        setAudioBlob(audioBlob)
-        audioChunksRef.current = []
-      }
-
-      mediaRecorderRef.current.start()
-      setIsRecording(true)
-    }
-
-    const handleStopRecording = () => {
-      mediaRecorderRef.current?.stop()
-      setIsRecording(false)
-    }
+    const {
+      handleStartRecording,
+      handleStopRecording,
+      isRecording,
+      audioBlob,
+    } = useAudioRecorder({
+      mediaRecorderRef,
+      audioChunksRef,
+    })
 
     const handleSubmit = async () => {
       if (!email || !audioBlob) {
